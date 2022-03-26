@@ -97,7 +97,7 @@ const Faucet = (props) => {
 						{
 							chainId: "3967",
 							chainName: "DYNO Testnet",
-							rpcUrls: ["https://tapi.dynoprotocol.com/"],
+							rpcUrls: ["https://tapi.dynoprotocol.com"],
 							nativeCurrency: {
 								name: "tDYNO",
 								symbol: "tDYNO",
