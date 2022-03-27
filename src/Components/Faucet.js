@@ -9,79 +9,132 @@ import styledComponents from "styled-components";
 
 const Faucet = (props) => {
   const [balance, setBalance] = useState();
-  const [chainID, setChainID] = useState(null);
-  const ethereum = window.ethereum;
-  const provider = new ethers.providers.Web3Provider(ethereum);
+  const [networkConnected, setNetworkConnected] = useState(true);
+  const [provider, setProvider] = useState();
+  const [signer, setSigner] = useState();
+  const [account, setAccount] = useState("");
 
-  async function checkValidNetwork() {
-    try {
-      // @ts-ignore
-      await window.ethereum.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: "0xF7F" }],
+  async function handleWalletConnection() {
+    // @ts-ignore
+    const { ethereum } = window;
+
+    if (ethereum && ethereum.isMetaMask) {
+      const provider = new ethers.providers.Web3Provider(ethereum);
+      setProvider(provider);
+
+      let localSigner = provider.getSigner();
+      setSigner(localSigner);
+
+      const accounts = await ethereum.request({
+        method: "eth_requestAccounts",
       });
-    } catch (switchError) {
-      // This error code indicates that the chain has not been added to MetaMask.
-      // @ts-ignore
-      if (switchError.code === 4902) {
-        try {
-          // @ts-ignore
-          await window.ethereum.request({
-            method: "wallet_addEthereumChain",
-            params: [
-              {
-                chainId: "0xF7F",
-                chainName: "DYNO-TESTNET",
-                nativeCurrency: {
-                  name: "DYNO",
-                  symbol: "DYNO", // 2-6 characters long
-                  decimals: 18,
+
+      ethereum.on("chainChanged", async function (chain) {
+        if (chain !== "0xf7f") {
+          console.log("DYNO not connected!");
+          setNetworkConnected(false);
+          showAlert("DYNO Testnet not connected!", "error");
+        } else {
+          console.log("DYNO connected!");
+          showAlert("DYNO Testnet Connected", "success");
+          setNetworkConnected(true);
+        }
+      });
+
+      ethereum.on("accountsChanged", async function (accounts) {
+        console.log(accounts);
+        localSigner = provider.getSigner();
+        setSigner(localSigner);
+        setAccount(accounts[0]);
+      });
+
+      setAccount(accounts[0]);
+
+      addNetwork();
+    } else {
+      showAlert(
+        '<a href="https://metamask.io/download" target="_blank" rel="noreferrer"> MetaMask</a>'
+      );
+    }
+  }
+
+  async function addNetwork() {
+    if (typeof ethereum !== "undefined") {
+      try {
+        // @ts-ignore
+        await window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: "0xF7F" }],
+        });
+      } catch (switchError) {
+        // This error code indicates that the chain has not been added to MetaMask.
+        // @ts-ignore
+        if (switchError.code === 4902) {
+          try {
+            // @ts-ignore
+            await window.ethereum.request({
+              method: "wallet_addEthereumChain",
+              params: [
+                {
+                  chainId: "0xF7F",
+                  chainName: "DYNO-TESTNET",
+                  nativeCurrency: {
+                    name: "DYNO",
+                    symbol: "DYNO", // 2-6 characters long
+                    decimals: 18,
+                  },
+                  rpcUrls: ["https://tapi.dynoprotocol.com"],
+                  blockExplorerUrls: ["https://testnet.dynoscan.io"],
                 },
-                rpcUrls: ["https://tapi.dynoprotocol.com"],
-                blockExplorerUrls: ["https://testnet.dynoscan.io"],
-              },
-            ],
-          });
-        } catch (addError) {
-          // handle "add" error
+              ],
+            });
+          } catch (addError) {
+            // handle "add" error
+          }
+        }
+        // handle other "switch" errors
+        else {
+          showAlert("Network Switch Denied", "error");
         }
       }
-      // handle other "switch" errors
-      else {
-        alert("Network Switch Denied");
-      }
+    } else {
+      showAlert("Unable to connect to a Wallet", "error");
     }
   }
 
   useEffect(() => {
-    checkValidNetwork();
-    // getBalance();
-    ethereum.on("chainChanged", () => {
-      window.location.reload();
-    });
-    ethereum.on("accountsChanged", () => {
-      window.location.reload();
-    });
+    handleWalletConnection();
   }, []);
+
+  useEffect(() => {
+    if (account) {
+      getBalance();
+    }
+  }, [account]);
 
   async function getBalance() {
     if (typeof ethereum !== "undefined") {
-      const { chainId } = await provider.getNetwork();
-      setChainID(chainId);
-      const [account] = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
+      // const { chainId } = await provider.getNetwork();
+      // setChainID(chainId);
+      // const [account] = await window.ethereum.request({
+      //   method: "eth_requestAccounts",
+      // });
 
+      console.log("----", account);
       const contract = new ethers.Contract(TokenAddress, TokenAbi, provider);
       contract
         .balanceOf(account)
-        .then((balance) => setBalance((balance / 10 ** 18).toString()))
-        .catch((err) =>
+        .then((balance) => {
+          setBalance((balance / 10 ** 18).toString());
+          console.log(balance);
+        })
+        .catch((err) => {
+          console.log(err);
           showAlert(
             "Unable to fetch balance, try switching the network",
             "error"
-          )
-        );
+          );
+        });
     } else {
       showAlert("Unable to connect to a Wallet", "error");
     }
@@ -89,7 +142,6 @@ const Faucet = (props) => {
 
   async function faucet() {
     if (typeof ethereum !== "undefined") {
-      const signer = provider.getSigner();
       const contract = new ethers.Contract(FaucetAddress, FaucetAbi, signer);
       contract
         .extractToken()
@@ -107,7 +159,7 @@ const Faucet = (props) => {
   }
 
   async function showToken() {
-    await checkValidNetwork();
+    await addNetwork();
     if (typeof ethereum !== "undefined") {
       provider.provider.sendAsync(
         {
@@ -133,36 +185,10 @@ const Faucet = (props) => {
     }
   }
 
-  async function addNetwork() {
-    if (typeof ethereum !== "undefined") {
-      try {
-        provider.provider.sendAsync({
-          method: "wallet_addEthereumChain",
-          params: [
-            {
-              chainId: "0xF7F",
-              chainName: "DYNO Testnet",
-              rpcUrls: ["https://tapi.dynoprotocol.com"],
-              nativeCurrency: {
-                name: "tDYNO",
-                symbol: "tDYNO",
-                decimals: 18,
-              },
-            },
-          ],
-        });
-      } catch (addError) {
-        console.log(addError);
-      }
-    } else {
-      showAlert("Unable to connect to a Wallet", "error");
-    }
-  }
-
   return (
     <Container
       className="shadow p-4 rounded"
-      style={{ border: "1px solid #44bd32", marginTop: "4rem", width: "60%" }}
+      style={{ border: "1px solid #44bd32", marginTop: "2rem", width: "90%" }}
     >
       <Row>
         <Col style={{ textAlign: "left" }}>
@@ -196,10 +222,12 @@ const Faucet = (props) => {
             onClick={addNetwork}
             color="success"
             className="rounded-pill"
-            disabled={chainID === 3967}
+            disabled={networkConnected}
             outline
           >
-            Add/Switch Network
+            {networkConnected
+              ? "Connected To DYNO Testnet"
+              : "Add/Switch Network"}
           </StyledButton>
         </Col>
       </Row>
