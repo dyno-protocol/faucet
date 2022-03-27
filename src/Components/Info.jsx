@@ -9,13 +9,13 @@ function Info() {
 					<h2>Important Links</h2>
 					<ul>
 						<li>
-							Visit the Testnet Explorer{" "}
+							Visit the{" "}
 							<a
 								href="https://testnet.dynoscan.io/"
 								target="_blank"
 								rel="noreferrer"
 							>
-								Matic
+								Testnet Explorer
 							</a>
 						</li>
 						<li>
@@ -35,17 +35,17 @@ function Info() {
 								target="_blank"
 								rel="noreferrer"
 							>
-								Polygon Scan
+								Dyno Testnet
 							</a>
 						</li>
 						<li>
-							Documentation{" "}
+							Visit the{" "}
 							<a
 								href="https://docs.dynoprotocol.com/#/en-us/"
 								target="_blank"
 								rel="noreferrer"
 							>
-								Polygon network{" "}
+								Documentation{" "}
 							</a>
 							on Metamask
 						</li>
