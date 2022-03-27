@@ -116,9 +116,9 @@ const Faucet = (props) => {
 	return (
 		<Container className="shadow p-4 rounded">
 			<Row>
-				<h2>Recieve SANDY to your wallet</h2>
+				<h2>Recieve tDYNO to your wallet</h2>
 				<hr />
-				<h5>You currently have {balance ?? 0} SANDY</h5>
+				<h5>You currently have {balance ?? 0} tDYNO</h5>
 			</Row>
 
 			<Row>
