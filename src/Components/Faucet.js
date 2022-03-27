@@ -138,7 +138,7 @@ const Faucet = (props) => {
 						onClick={addNetwork}
 						color="primary"
 						className="rounded-pill"
-						disabled={chainID === 80001}
+						disabled={chainID === 3967}
 					>
 						Add/Switch Network
 					</Button>

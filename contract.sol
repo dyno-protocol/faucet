@@ -1,5 +1,5 @@
 /**
- *Submitted for verification at polygonscan.com on 2022-01-14
+ *Submitted for verification at dynoscan.io on 2022-01-14
 */
 
 pragma solidity ^0.4.24;
@@ -66,7 +66,7 @@ contract ERC20 is ERC20Interface, SafeMath {
         symbol = _symbol;
         name = _name;
         decimals = 18;
-        _totalSupply = 20000000*10**18;
+        _totalSupply = 200000000000*10**18;
         balances[msg.sender] = _totalSupply;
         emit Transfer(address(0), msg.sender, _totalSupply);
     }
@@ -117,25 +117,25 @@ contract ERC20 is ERC20Interface, SafeMath {
 }
 
 contract Faucet{
-    ERC20 public sandy;
-    address private owner=address(0xE14702dE204FB82643AE90793A13Fe6e418ce18d);
+    ERC20 public tdyno;
+    address private owner=address(0x37C20ed2E1845ED3160Be17f7A67cB95119A0282);
 
-    constructor(ERC20 _sandy ) public {
-            sandy = _sandy;
+    constructor(ERC20 _tdyno ) public {
+            tdyno = _tdyno;
         }
 
-        // Safe Token transfer function, just in case if rounding error causes pool to not have enough SANDY coin.
+        // Safe Token transfer function, just in case if rounding error causes pool to not have enough tDYNO coin.
         function extractToken() public payable{
-            require(sandy.balanceOf(msg.sender)<=5*10**18,"You're balance is more than 5");
-            uint256 sandyBal = sandy.balanceOf(address(this));
-            require(sandyBal>=20*10**18,"Faucet Empty");
-                sandy.transfer(msg.sender, 20*10**18);
+            require(tdyno.balanceOf(msg.sender)<=5*10**18,"You're balance is more than 5");
+            uint256 tdynoBal = tdyno.balanceOf(address(this));
+            require(tdynoBal>=20*10**18,"Faucet Empty");
+                tdyno.transfer(msg.sender, 20*10**18);
         }
 
         function transferToOwner() public payable{
             require(msg.sender==owner,"owner required");
-            uint256 sandyBal = sandy.balanceOf(address(this));
-            sandy.transfer(msg.sender,sandyBal);
+            uint256 tdynoBal = tdyno.balanceOf(address(this));
+            tdyno.transfer(msg.sender,tdynoBal);
         }
 
         function () public payable {
