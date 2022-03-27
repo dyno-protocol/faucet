@@ -7,145 +7,190 @@ import { FaucetAddress, TokenAddress } from "../Config/Constants";
 import { showAlert } from "./Alert";
 
 const Faucet = (props) => {
-	const [balance, setBalance] = useState();
-	const [chainID, setChainID] = useState(null);
-	const ethereum = window.ethereum;
-	const provider = new ethers.providers.Web3Provider(ethereum);
+  const [balance, setBalance] = useState();
+  const [chainID, setChainID] = useState(null);
+  const ethereum = window.ethereum;
+  const provider = new ethers.providers.Web3Provider(ethereum);
 
-	useEffect(() => {
-		getBalance();
-		ethereum.on("chainChanged", () => {
-			window.location.reload();
-		});
-		ethereum.on("accountsChanged", () => {
-			window.location.reload();
-		});
-	}, []);
+  async function checkValidNetwork() {
+    try {
+      // @ts-ignore
+      await window.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: "0xF7F" }],
+      });
+    } catch (switchError) {
+      // This error code indicates that the chain has not been added to MetaMask.
+      // @ts-ignore
+      if (switchError.code === 4902) {
+        try {
+          // @ts-ignore
+          await window.ethereum.request({
+            method: "wallet_addEthereumChain",
+            params: [
+              {
+                chainId: "0xF7F",
+                chainName: "DYNO-TESTNET",
+                nativeCurrency: {
+                  name: "DYNO",
+                  symbol: "DYNO", // 2-6 characters long
+                  decimals: 18,
+                },
+                rpcUrls: ["https://tapi.dynoprotocol.com"],
+                blockExplorerUrls: ["https://testnet.dynoscan.io"],
+              },
+            ],
+          });
+        } catch (addError) {
+          // handle "add" error
+        }
+      }
+      // handle other "switch" errors
+      else {
+        alert("Network Switch Denied");
+      }
+    }
+  }
 
-	async function getBalance() {
-		if (typeof ethereum !== "undefined") {
-			const { chainId } = await provider.getNetwork();
-			setChainID(chainId);
-			const [account] = await window.ethereum.request({
-				method: "eth_requestAccounts",
-			});
+  useEffect(() => {
+    checkValidNetwork();
+    // getBalance();
+    ethereum.on("chainChanged", () => {
+      window.location.reload();
+    });
+    ethereum.on("accountsChanged", () => {
+      window.location.reload();
+    });
+  }, []);
 
-			const contract = new ethers.Contract(TokenAddress, TokenAbi, provider);
-			contract
-				.balanceOf(account)
-				.then((balance) => setBalance((balance / 10 ** 18).toString()))
-				.catch((err) =>
-					showAlert(
-						"Unable to fetch balance, try switching the network",
-						"error"
-					)
-				);
-		} else {
-			showAlert("Unable to connect to a Wallet", "error");
-		}
-	}
+  async function getBalance() {
+    if (typeof ethereum !== "undefined") {
+      const { chainId } = await provider.getNetwork();
+      setChainID(chainId);
+      const [account] = await window.ethereum.request({
+        method: "eth_requestAccounts",
+      });
 
-	async function faucet() {
-		if (typeof ethereum !== "undefined") {
-			const signer = provider.getSigner();
-			const contract = new ethers.Contract(FaucetAddress, FaucetAbi, signer);
-			contract
-				.extractToken()
-				.then((res) => {
-					console.log(res);
-					showAlert("Transaction Successfull", "success");
-					getBalance();
-				})
-				.catch((err) => {
-					showAlert(err?.data?.message, "error");
-				});
-		} else {
-			showAlert("Unable to connect to a Wallet", "error");
-		}
-	}
-	async function showToken() {
-		if (typeof ethereum !== "undefined") {
-			provider.provider.sendAsync(
-				{
-					method: "metamask_watchAsset",
-					params: {
-						type: "ERC20",
-						options: {
-							address: TokenAddress,
-							symbol: "tDYNO",
-							decimals: 18,
-							image: "https://dynoprotocol.com/wp-content/uploads/2022/03/coin.png",
-						},
-					},
-					id: Math.round(Math.random() * 100000),
-				},
-				(err, added) => {
-					console.log("provider returned", err, added);
-				}
-			);
-		} else {
-			showAlert("Unable to connect to a Wallet", "error");
-		}
-	}
+      const contract = new ethers.Contract(TokenAddress, TokenAbi, provider);
+      contract
+        .balanceOf(account)
+        .then((balance) => setBalance((balance / 10 ** 18).toString()))
+        .catch((err) =>
+          showAlert(
+            "Unable to fetch balance, try switching the network",
+            "error"
+          )
+        );
+    } else {
+      showAlert("Unable to connect to a Wallet", "error");
+    }
+  }
 
-	async function addNetwork() {
-		if (typeof ethereum !== "undefined") {
-			try {
-				provider.provider.sendAsync({
-					method: "wallet_addEthereumChain",
-					params: [
-						{
-							chainId: "3967",
-							chainName: "DYNO Testnet",
-							rpcUrls: ["https://tapi.dynoprotocol.com"],
-							nativeCurrency: {
-								name: "tDYNO",
-								symbol: "tDYNO",
-								decimals: 18,
-							},
-						},
-					],
-				});
-			} catch (addError) {
-				console.log(addError);
-			}
-		} else {
-			showAlert("Unable to connect to a Wallet", "error");
-		}
-	}
-	return (
-		<Container className="shadow p-4 rounded">
-			<Row>
-				<h2>Recieve tDYNO to your wallet</h2>
-				<hr />
-				<h5>You currently have {balance ?? 0} tDYNO</h5>
-			</Row>
+  async function faucet() {
+    if (typeof ethereum !== "undefined") {
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(FaucetAddress, FaucetAbi, signer);
+      contract
+        .extractToken()
+        .then((res) => {
+          console.log(res);
+          showAlert("Transaction Successfull", "success");
+          getBalance();
+        })
+        .catch((err) => {
+          showAlert(err?.data?.message, "error");
+        });
+    } else {
+      showAlert("Unable to connect to a Wallet", "error");
+    }
+  }
 
-			<Row>
-				<Col className="d-flex justify-content-around mt-4">
-					<Button
-						onClick={faucet}
-						color="primary"
-						className="rounded-pill"
-						disabled={balance > 15}
-					>
-						Request Token!
-					</Button>
-					<Button onClick={showToken} color="primary" className="rounded-pill">
-						View Token in MetaMask
-					</Button>
-					<Button
-						onClick={addNetwork}
-						color="primary"
-						className="rounded-pill"
-						disabled={chainID === 3967}
-					>
-						Add/Switch Network
-					</Button>
-				</Col>
-			</Row>
-		</Container>
-	);
+  async function showToken() {
+    await checkValidNetwork();
+    if (typeof ethereum !== "undefined") {
+      provider.provider.sendAsync(
+        {
+          method: "metamask_watchAsset",
+          params: {
+            type: "ERC20",
+            options: {
+              address: TokenAddress,
+              symbol: "tDYNO",
+              decimals: 18,
+              image:
+                "https://dynoprotocol.com/wp-content/uploads/2022/03/coin.png",
+            },
+          },
+          id: Math.round(Math.random() * 100000),
+        },
+        (err, added) => {
+          console.log("provider returned", err, added);
+        }
+      );
+    } else {
+      showAlert("Unable to connect to a Wallet", "error");
+    }
+  }
+
+  async function addNetwork() {
+    if (typeof ethereum !== "undefined") {
+      try {
+        provider.provider.sendAsync({
+          method: "wallet_addEthereumChain",
+          params: [
+            {
+              chainId: "0xF7F",
+              chainName: "DYNO Testnet",
+              rpcUrls: ["https://tapi.dynoprotocol.com"],
+              nativeCurrency: {
+                name: "tDYNO",
+                symbol: "tDYNO",
+                decimals: 18,
+              },
+            },
+          ],
+        });
+      } catch (addError) {
+        console.log(addError);
+      }
+    } else {
+      showAlert("Unable to connect to a Wallet", "error");
+    }
+  }
+
+  return (
+    <Container className="shadow p-4 rounded">
+      <Row>
+        <h2>Recieve tDYNO to your wallet</h2>
+        <hr />
+        <h5>You currently have {balance ?? 0} tDYNO</h5>
+      </Row>
+
+      <Row>
+        <Col className="d-flex justify-content-around mt-4">
+          <Button
+            onClick={faucet}
+            color="primary"
+            className="rounded-pill"
+            disabled={balance > 15}
+          >
+            Request Token!
+          </Button>
+          <Button onClick={showToken} color="primary" className="rounded-pill">
+            View Token in MetaMask
+          </Button>
+          <Button
+            onClick={addNetwork}
+            color="primary"
+            className="rounded-pill"
+            disabled={chainID === 3967}
+          >
+            Add/Switch Network
+          </Button>
+        </Col>
+      </Row>
+    </Container>
+  );
 };
 
 export default Faucet;
