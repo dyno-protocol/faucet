@@ -5,6 +5,7 @@ import TokenAbi from "../Config/abi/erc20.json";
 import FaucetAbi from "../Config/abi/faucet.json";
 import { FaucetAddress, TokenAddress } from "../Config/Constants";
 import { showAlert } from "./Alert";
+import styledComponents from "styled-components";
 
 const Faucet = (props) => {
   const [balance, setBalance] = useState();
@@ -159,34 +160,47 @@ const Faucet = (props) => {
   }
 
   return (
-    <Container className="shadow p-4 rounded">
+    <Container
+      className="shadow p-4 rounded"
+      style={{ border: "1px solid #44bd32", marginTop: "4rem", width: "60%" }}
+    >
       <Row>
-        <h2>Recieve tDYNO to your wallet</h2>
-        <hr />
-        <h5>You currently have {balance ?? 0} tDYNO</h5>
+        <Col style={{ textAlign: "left" }}>
+          <h5>Recieve tDYNO to your wallet</h5>
+        </Col>
+        <Col style={{ textAlign: "right" }}>
+          <h5>Balance: {balance ?? 0} tDYNO</h5>
+        </Col>
       </Row>
 
       <Row>
         <Col className="d-flex justify-content-around mt-4">
-          <Button
+          <StyledButton
             onClick={faucet}
-            color="primary"
+            color="success"
             className="rounded-pill"
             disabled={balance > 15}
+            outline
           >
             Request Token!
-          </Button>
-          <Button onClick={showToken} color="primary" className="rounded-pill">
+          </StyledButton>
+          <StyledButton
+            onClick={showToken}
+            color="success"
+            className="rounded-pill"
+            outline
+          >
             View Token in MetaMask
-          </Button>
-          <Button
+          </StyledButton>
+          <StyledButton
             onClick={addNetwork}
-            color="primary"
+            color="success"
             className="rounded-pill"
             disabled={chainID === 3967}
+            outline
           >
             Add/Switch Network
-          </Button>
+          </StyledButton>
         </Col>
       </Row>
     </Container>
@@ -194,3 +208,13 @@ const Faucet = (props) => {
 };
 
 export default Faucet;
+
+const StyledButton = styledComponents(Button)`
+	border-color: #44bd32;
+	color: #44bd32;
+
+	&:hover {
+		background-color: #44bd32;
+		color: #353b48;
+	}
+`;
