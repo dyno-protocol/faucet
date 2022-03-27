@@ -9,9 +9,9 @@ function Info() {
 					<h2>Important Links</h2>
 					<ul>
 						<li>
-							Get Free{" "}
+							Visit the Testnet Explorer{" "}
 							<a
-								href="https://faucet.polygon.technology/"
+								href="https://testnet.dynoscan.io/"
 								target="_blank"
 								rel="noreferrer"
 							>
@@ -39,9 +39,9 @@ function Info() {
 							</a>
 						</li>
 						<li>
-							Add{" "}
+							Documentation{" "}
 							<a
-								href="https://docs.polygon.technology/docs/develop/metamask/config-polygon-on-metamask/"
+								href="https://docs.dynoprotocol.com/#/en-us/"
 								target="_blank"
 								rel="noreferrer"
 							>
