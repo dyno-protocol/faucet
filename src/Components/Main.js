@@ -6,8 +6,11 @@ import Info from "./Info";
 function Main() {
   return (
     <Container>
-      <Row>
-        <Col className="col-4">
+      <Row style={{ textAlign: "right" }}>
+        <Col className="col-5">
+          <h1>Testnet faucet for</h1>
+        </Col>
+        <Col className="col-1">
           <img src="/icons/logo-full.png" />
         </Col>
       </Row>
