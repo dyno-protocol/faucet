@@ -1,2 +1,2 @@
 # Dyno Faucet
-![image](https://user-images.githubusercontent.com/44255731/151350750-ac78f9fc-a2af-47ec-9bac-0794266714cc.png)
+![image](https://pbs.twimg.com/profile_banners/1503473035432538114/1647329697/600x200)
