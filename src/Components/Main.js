@@ -45,7 +45,7 @@ function Main() {
         </div>
         <div>
           <a
-            href={`https://mumbai.polygonscan.com/address/${TokenAddress}`}
+            href={`https://testnet.dynoscan.io/token/${TokenAddress}/token-transfers`}
             target="_blank"
             rel="noreferrer"
           >

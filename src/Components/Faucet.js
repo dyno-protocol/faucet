@@ -9,10 +9,19 @@ import styledComponents from "styled-components";
 
 const Faucet = (props) => {
   const [balance, setBalance] = useState();
-  const [networkConnected, setNetworkConnected] = useState(true);
+  const [networkConnected, setNetworkConnected] = useState(false);
   const [provider, setProvider] = useState();
   const [signer, setSigner] = useState();
   const [account, setAccount] = useState("");
+
+  async function checkNetwork() {
+    const { ethereum } = window;
+    const provider = new ethers.providers.Web3Provider(ethereum);
+
+    const { chainId } = await provider.getNetwork();
+
+    setNetworkConnected(chainId === 3967);
+  }
 
   async function handleWalletConnection() {
     // @ts-ignore
@@ -102,6 +111,7 @@ const Faucet = (props) => {
 
   useEffect(() => {
     handleWalletConnection();
+    checkNetwork();
   }, []);
 
   useEffect(() => {
