@@ -183,7 +183,7 @@ contract Faucet {
         );
         uint256 tdynoBal = tdyno.balanceOf(address(this));
         require(tdynoBal >= 20 * 10**18, "Faucet Empty");
-        tdyno.transfer(msg.sender, 20 * 10**18);
+        tdyno.transfer(msg.sender, 1 * 10**18);
     }
 
     function transferToOwner() public payable {

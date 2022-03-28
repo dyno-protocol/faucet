@@ -52,9 +52,7 @@ const Faucet = (props) => {
 
       addNetwork();
     } else {
-      showAlert(
-        '<a href="https://metamask.io/download" target="_blank" rel="noreferrer"> MetaMask</a>'
-      );
+      showAlert("Download Metamask!");
     }
   }
 
@@ -205,7 +203,7 @@ const Faucet = (props) => {
             onClick={faucet}
             color="success"
             className="rounded-pill"
-            disabled={balance > 15}
+            disabled={balance > 5}
             outline
           >
             Request Token!
